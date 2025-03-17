@@ -1,23 +1,35 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
-import EmailForm from "./components/EmailForm";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import DataEmail from "./components/DataEmail";
+import BroadcastEmail from "./components/EmailForm";
 import EmailStatus from "./components/EmailStatus";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (
     <Router>
-      <div className="flex">
-        {/* Sidebar */}
-        <Sidebar />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        {/* Parent Route Dashboard */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        >
+          {/* Halaman default Dashboard (tampilan awal sebelum pilih menu) */}
+          <Route index element={<h1 className="text-2xl font-semibold">Selamat Datang di Dashboard</h1>} />
 
-        {/* Konten utama yang melebar ketika sidebar ditutup */}
-        <div className="transition-all duration-300 flex-1 min-h-screen bg-gray-100 p-6">
-          <Routes>
-            <Route path="/broadcast-email" element={<><EmailForm /><EmailStatus /></>} />
-            <Route path="/data-email" element={<div>Data Email Page</div>} />
-          </Routes>
-        </div>
-      </div>
+          {/* Sub-routes untuk konten dalam dashboard */}
+          <Route path="data-email" element={<DataEmail />} />
+          <Route path="broadcast-email" element={<BroadcastEmail />} />
+          <Route path="email-status" element={<EmailStatus />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

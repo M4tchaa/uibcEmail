@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiMenu, FiMail, FiSend, FiLogOut } from "react-icons/fi"; // Import ikon dari react-icons
+import { FiMenu, FiMail, FiSend, FiList, FiLogOut } from "react-icons/fi"; // Import ikon tambahan
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
@@ -8,8 +8,9 @@ function Sidebar() {
 
   const handleLogout = () => {
     if (window.confirm("Apakah Anda yakin ingin logout?")) {
+      localStorage.removeItem("token");
       alert("Logout berhasil!");
-      navigate("/");
+      navigate("../login");
     }
   };
 
@@ -24,13 +25,17 @@ function Sidebar() {
 
         {/* Menu */}
         <nav className="flex flex-col space-y-4 mt-4 px-2">
-          <Link to="/data-email" className="flex items-center p-3 hover:bg-blue-700 rounded">
+          <Link to="/dashboard/data-email" className="flex items-center p-3 hover:bg-blue-700 rounded">
             <FiMail className="text-xl" />
             {isOpen && <span className="ml-3">Data Email</span>}
           </Link>
-          <Link to="/broadcast-email" className="flex items-center p-3 hover:bg-blue-700 rounded">
+          <Link to="/dashboard/broadcast-email" className="flex items-center p-3 hover:bg-blue-700 rounded">
             <FiSend className="text-xl" />
             {isOpen && <span className="ml-3">Broadcast Email</span>}
+          </Link>
+          <Link to="/dashboard/email-status" className="flex items-center p-3 hover:bg-blue-700 rounded">
+            <FiList className="text-xl" />
+            {isOpen && <span className="ml-3">Email Status</span>}
           </Link>
           <button onClick={handleLogout} className="flex items-center p-3 hover:bg-red-600 rounded">
             <FiLogOut className="text-xl" />
