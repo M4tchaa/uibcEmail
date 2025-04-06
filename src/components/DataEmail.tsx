@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import readXlsxFile from "read-excel-file";
 import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-const categories = ["Mahasiswa", "Pelajar", "Pekerja", "Lainnya"];
+const categories = ["peserta", "panitia", "trial", "key"];
 
 const DataEmail = () => {
   const [data, setData] = useState([]);
@@ -24,13 +25,20 @@ const DataEmail = () => {
     try {
       const response = await fetch(`${API_URL}/data-email`);
       const result = await response.json();
-      setData(result);
+
+      if (result.success) {
+        setData(result.data); // ✅ Ambil `data` dari result
+      } else {
+        toast.error("Gagal memuat data email");
+      }
+
       setIsLoading(false);
     } catch (error) {
       toast.error("Gagal mengambil data");
       setIsLoading(false);
     }
   };
+
 
   // 🗑️ Hapus Data dengan Konfirmasi
   const handleDelete = async (id: number) => {
@@ -124,7 +132,7 @@ const DataEmail = () => {
       <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="mb-4 border p-2" />
 
       {/* ➕ Tombol Tambah Data */}
-      <button onClick={handleAddUser} className="bg-green-600 text-white px-4 py-2 rounded-md mb-4">
+      <button onClick={handleAddUser} className="bg-blue-700 text-white px-4 py-2 rounded-md mb-4 ml-2">
         Tambah Data
       </button>
 
@@ -166,25 +174,56 @@ const DataEmail = () => {
       )}
 
       {/* 📝 Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-md shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">{isEditing ? "Edit Data" : "Tambah Data"}</h2>
-            <form onSubmit={handleSave} className="space-y-2">
-              <input type="text" placeholder="Nama" value={currentUser.name} onChange={(e) => setCurrentUser({ ...currentUser, name: e.target.value })} className="border p-2 w-full" required />
-              <input type="email" placeholder="Email" value={currentUser.email} onChange={(e) => setCurrentUser({ ...currentUser, email: e.target.value })} className="border p-2 w-full" required />
-              <input type="text" placeholder="No HP" value={currentUser.phone} onChange={(e) => setCurrentUser({ ...currentUser, phone: e.target.value })} className="border p-2 w-full" required />
-              <select value={currentUser.category} onChange={(e) => setCurrentUser({ ...currentUser, category: e.target.value })} className="border p-2 w-full">
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">Simpan</button>
-              <button onClick={() => setModalOpen(false)} className="ml-2 bg-gray-400 text-white px-4 py-2 rounded-md">Batal</button>
-            </form>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {modalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl"
+            >
+              <h2 className="text-xl font-semibold mb-4">{isEditing ? "Edit Data" : "Tambah Data"}</h2>
+              <form onSubmit={handleSave} className="space-y-4">
+                <input type="text" placeholder="Nama" value={currentUser.name} onChange={(e) => setCurrentUser({ ...currentUser, name: e.target.value })} className="border p-2 w-full rounded-md" required />
+                <input type="email" placeholder="Email" value={currentUser.email} onChange={(e) => setCurrentUser({ ...currentUser, email: e.target.value })} className="border p-2 w-full rounded-md" required />
+                <input type="text" placeholder="No HP" value={currentUser.phone} onChange={(e) => setCurrentUser({ ...currentUser, phone: e.target.value })} className="border p-2 w-full rounded-md" required />
+
+                {/* Gender */}
+                <div className="flex items-center space-x-6">
+                  <label className="flex items-center gap-2">
+                    <input type="radio" value="MALE" checked={currentUser.gender === "MALE"} onChange={(e) => setCurrentUser({ ...currentUser, gender: e.target.value })} />
+                    Laki-laki
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="radio" value="FEMALE" checked={currentUser.gender === "FEMALE"} onChange={(e) => setCurrentUser({ ...currentUser, gender: e.target.value })} />
+                    Perempuan
+                  </label>
+                </div>
+
+                {/* Kategori */}
+                <select value={currentUser.category} onChange={(e) => setCurrentUser({ ...currentUser, category: e.target.value })} className="border p-2 w-full rounded-md">
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+
+                <div className="flex justify-end gap-2">
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Simpan</button>
+                  <button type="button" onClick={() => setModalOpen(false)} className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md">Batal</button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };
